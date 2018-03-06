@@ -9,38 +9,24 @@ class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            spottings: []
+            spottings: {}
         }
     }
     componentDidMount () {
-        db.fetch('spottings', {
-            context: this,
-            asArray: true,
-            queries: {
-                orderByChild: 'confirmed',
-                equalTo: false
-            },
-            then(data){
-                console.log(data);
-                this.setState({
-                    spottings: data
-                });
-            }
+        db.ref('spottings').on('value', snapshot => {
+            console.log(snapshot.val())
+            this.setState({
+                spottings: snapshot.val()
+            });
         });
     }
     render() {
         return (
             <div>
-                <h1>Sign In</h1>
-                <div>
-                    <input type="username" value="username" id="user"/>
-                    <br/>
-                    <input type="password" value="username" id="pass"/>
-                </div>
                 <h1>Feed</h1>
                 <div>
-                    {this.state.spottings.map((spotting) =>
-                        <Spotting spotting={spotting} key={spotting.key}/>
+                    {Object.entries(this.state.spottings).map((spotting) =>
+                        <Spotting spotting={spotting[1]} key={spotting[0]}/>
                     )}
                 </div>
             </div>
@@ -51,11 +37,13 @@ class Dashboard extends Component {
 class Spotting extends Component {
     render() {
         return (
-            <img src={this.props.spotting.image} alt="img of bird"/>
+            <div>
+                <img src={this.props.spotting.image} alt="img of bird" width="60%"/>
+                <br/>
+                <button>Confirm</button>
+            </div>
         )
     }
 }
 
-export default {
-    Dashboard
-};
+export default Dashboard;
