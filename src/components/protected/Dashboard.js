@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 
 import firebase from 'firebase'
 
-import keys from '../../config/';
-
-var app = firebase.initializeApp(keys);
+var app = firebase.app();
 var db = firebase.database(app);
 
 class Dashboard extends Component {
@@ -58,6 +56,6 @@ class Spotting extends Component {
     }
 }
 
-export {
+export default {
     Dashboard
 };
