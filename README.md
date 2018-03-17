@@ -1,4 +1,4 @@
-# conf
+# src/components/config/index.js
 
 ```
 const keys = {
