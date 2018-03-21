@@ -17,7 +17,9 @@ class Dashboard extends Component {
             var results = [];
             snapshot.forEach(spotting => {
                 if (spotting.child('confirmed').val() !== true) {
-                    results.push(spotting.val());
+                    var result = spotting.val();
+                    result[0] = spotting.key;
+                    results.push(result);
                 }
             });
             this.setState({
@@ -32,7 +34,7 @@ class Dashboard extends Component {
                 <h1>Feed</h1>
                 <div>
                     {Object.entries(this.state.spottings).map((spotting) =>
-                        <Spotting spotting={spotting[1]} key={spotting[0]}/>
+                        <Spotting spotting={spotting[1]} key={spotting[1][0]} pkey={spotting[1][0]}/>
                     )}
                 </div>
             </div>
@@ -56,7 +58,6 @@ class Spotting extends Component {
     
     componentDidMount () {
         db.ref('species').on('value', snapshot => {
-            console.log(snapshot.val());
             this.setState({
                 species: snapshot.val()
             })
@@ -64,13 +65,13 @@ class Spotting extends Component {
     }
 
     handleSearch(event) {
-        console.log("Search query changed");
+        console.log("Search query changed to:");
         this.setState({search: event.target.value});
         this.setState({value: "New"})
     }
 
     handleSelect(event) {
-        console.log("Select area has changed");
+        console.log("Select area has changed to:");
         console.log(event.target.value);
         this.setState({value: event.target.value});
     }
@@ -79,18 +80,33 @@ class Spotting extends Component {
         console.log("Confirming...");
         if (this.state.value === "") {
             console.log("No value!");
+            return;
         } else if (this.state.value === "New") {
-            console.log("Created new species:");
-            db.ref('species/').push().set({
-                'name': this.state.search,
-                'spottingCount': 1
-            })
-        } else {
-            db.ref('species/' + this.state.value).once('value', snapshot => {
-                console.log("Adding one to " + this.state.value);
+            // Create species
+            console.log("Creating new species:");
+            var ref = db.ref('species/').push();
+            console.log(ref.key);
+
+            ref.once('value', snapshot => {
+                snapshot.ref.child('name').set(this.state.search);
+                snapshot.ref.child('spottings').push().set(this.props.pkey);
                 snapshot.ref.child('spottingCount').set(snapshot.child('spottingCount').val()+1);
-            })
+            });
+        } else {
+            // Update species
+            db.ref('species/' + this.state.value).once('value', snapshot => {
+                console.log("[Species] Adding spotting to " + this.state.value);
+                snapshot.ref.child('spottings').push().set(this.props.pkey);
+                console.log("[Species] Adding one to spottingCount of" + this.state.value);
+                snapshot.ref.child('spottingCount').set(snapshot.child('spottingCount').val()+1);
+            });
         }
+        // Update spotting
+        db.ref('spottings/' + this.props.pkey).once('value', snapshot => {
+            console.log("[Spotting] Marking " + this.props.pkey + " as confirmed");
+            snapshot.ref.child('confirmed').set(true);
+            snapshot.ref.child('species').set(this.state.value);
+        });
     }
 
     render() {
