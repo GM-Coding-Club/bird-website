@@ -15,8 +15,15 @@ class Dashboard extends Component {
     componentDidMount () {
         db.ref('spottings').on('value', snapshot => {
             console.log(snapshot.val())
+            var results = [];
+            snapshot.forEach(spotting => {
+                if (spotting.child('confirmed').val() !== true) {
+                    results.push(spotting.val());
+                }
+            });
+            console.log(results);
             this.setState({
-                spottings: snapshot.val()
+                spottings: results
             });
         });
     }
@@ -41,6 +48,7 @@ class Spotting extends Component {
                 <img src={this.props.spotting.image} alt="img of bird" width="60%"/>
                 <br/>
                 <button>Confirm</button>
+                <a></a>
             </div>
         )
     }
