@@ -78,6 +78,7 @@ class Spotting extends Component {
 
     handleConfirm(event) {
         console.log("Confirming...");
+        var key;
         if (this.state.value === "") {
             console.log("No value!");
             return;
@@ -85,8 +86,9 @@ class Spotting extends Component {
             // Create species
             console.log("Creating new species:");
             var ref = db.ref('species/').push();
-            console.log(ref.key);
-
+            key = ref.key;
+            console.log(key);
+            
             ref.once('value', snapshot => {
                 snapshot.ref.child('name').set(this.state.search);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
@@ -94,6 +96,7 @@ class Spotting extends Component {
             });
         } else {
             // Update species
+            key = this.state.value;
             db.ref('species/' + this.state.value).once('value', snapshot => {
                 console.log("[Species] Adding spotting to " + this.state.value);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
@@ -105,7 +108,7 @@ class Spotting extends Component {
         db.ref('spottings/' + this.props.pkey).once('value', snapshot => {
             console.log("[Spotting] Marking " + this.props.pkey + " as confirmed");
             snapshot.ref.child('confirmed').set(true);
-            snapshot.ref.child('species').set(this.state.value);
+            snapshot.ref.child('species').set(key);
         });
     }
 
