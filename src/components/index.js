@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { Route, BrowserRouter, Link, Redirect, Switch } from 'react-router-dom'
 import Login from './Login'
 import Explore from './Explore'
+import Spotting from './Spotting'
 import Home from './Home'
 import Dashboard from './protected/Dashboard'
 import { logout } from '../helpers/auth'
@@ -60,7 +61,7 @@ export default class App extends Component {
           <nav className="navbar navbar-default navbar-static-top">
             <div className="container">
               <div className="navbar-header">
-                <Link to="/" className="navbar-brand">React Router + Firebase Auth</Link>
+                <Link to="/" className="navbar-brand">Feathered Friends</Link>
               </div>
               <ul className="nav navbar-nav pull-right">
                 <li>
@@ -93,6 +94,7 @@ export default class App extends Component {
                 <Route path='/' exact component={Home} />
                 <PublicRoute authed={this.state.authed} path='/login' component={Login} />
 		            <Route path='/explore' exact component={Explore} />
+                <Route path='/explore/spotting/:id' exact component={Spotting} />
                 <PrivateRoute authed={this.state.authed} path='/dashboard' component={Dashboard} />
                 <Route render={() => <h3>No Match</h3>} />
               </Switch>

@@ -9,7 +9,6 @@ import {clarifAiPrivate, clarifAiModelId} from '../../config/';
 var app = firebase.app();
 var db = firebase.database(app);
 
-console.log(clarifAiModelId);
 var clarifAiApp = new Clarifai.App({apiKey: clarifAiPrivate});
 
 class Dashboard extends Component {
@@ -87,13 +86,14 @@ class Spotting extends Component {
     }
 
     handleSearch(event) {
-        console.log("Search query changed to:");
+        console.log("Search query changed to: " + event.target.value);
+        console.log(event.target.value);
         this.setState({search: event.target.value});
         this.setState({value: "New"})
     }
 
     handleSelect(event) {
-        console.log("Select area has changed to:");
+        console.log("Select area has changed to: ");
         console.log(event.target.value);
         this.setState({value: event.target.value});
     }
@@ -158,7 +158,7 @@ class Spotting extends Component {
                 <img src={this.props.spotting.image} alt="img of bird" width="60%"/>
                 <br/>
                 <button onClick={this.handleConfirm}>Confirm</button>
-                <a>key: {this.state.value}</a>
+                key: {this.state.value}
                 <br/>
                 <input value={this.state.search} onChange={this.handleSearch}></input>
                 <select onChange={this.handleSelect}>
@@ -176,14 +176,15 @@ class Spotting extends Component {
                     }
                 </select>
                 <br/>
-                <a>predictions: </a>
-                <select>
-                    {
-                        this.state.concepts.map ((concept) => {
-                            return(<option value={concept.name} key={concept.id}>{concept.name}</option>)
-                        })
-                    }
-                </select>
+                predictions: {
+                    <select>
+                        {
+                            this.state.concepts.map ((concept) => {
+                                return(<option value={concept.name} key={concept.id}>{concept.name}</option>)
+                            })
+                        }
+                    </select>
+                }
             </div>
         )
     }
