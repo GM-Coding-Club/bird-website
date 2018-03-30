@@ -19,9 +19,9 @@ class Dashboard extends Component {
         }
     }
     componentDidMount () {
-        db.ref('spottings').on('value', snapshot => {
+        db.ref('spottings').on('value', (snapshot) => {
             var results = [];
-            snapshot.forEach(spotting => {
+            snapshot.forEach((spotting) => {
                 if (spotting.child('confirmed').val() !== true) {
                     var result = spotting.val();
                     result[0] = spotting.key;
@@ -64,7 +64,7 @@ class Spotting extends Component {
     }
     
     componentDidMount () {
-        db.ref('species').on('value', snapshot => {
+        db.ref('species').on('value', (snapshot) => {
             this.setState({
                 species: snapshot.val()
             })
@@ -111,7 +111,7 @@ class Spotting extends Component {
             key = ref.key;
             console.log(key);
             
-            ref.once('value', snapshot => {
+            ref.once('value', (snapshot) => {
                 snapshot.ref.child('name').set(this.state.search);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
                 snapshot.ref.child('spottingCount').set(snapshot.child('spottingCount').val()+1);
@@ -119,7 +119,7 @@ class Spotting extends Component {
         } else {
             // Update species
             key = this.state.value;
-            db.ref('species/' + this.state.value).once('value', snapshot => {
+            db.ref('species/' + this.state.value).once('value', (snapshot) => {
                 console.log("[Species] Adding spotting to " + this.state.value);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
                 console.log("[Species] Adding one to spottingCount of" + this.state.value);
@@ -127,7 +127,7 @@ class Spotting extends Component {
             });
         }
         // Update spotting
-        db.ref('spottings/' + this.props.pkey).once('value', snapshot => {
+        db.ref('spottings/' + this.props.pkey).once('value', (snapshot) => {
             console.log("[Spotting] Marking " + this.props.pkey + " as confirmed");
             snapshot.ref.child('confirmed').set(true);
             snapshot.ref.child('species').set(key);

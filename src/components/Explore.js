@@ -13,7 +13,7 @@ export default class Explore extends Component {
         }
     }
     componentDidMount () {
-        db.ref('spottings').on('value', snapshot => {
+        db.ref('spottings').on('value', (snapshot) => {
             var results = [];
             snapshot.forEach(spotting => {
                 if (spotting.child('confirmed').val() === true) {
@@ -51,7 +51,7 @@ class Spotting extends Component {
 	}
 
 	componentDidMount () {
-		db.ref('species/' + this.props.spotting.species).on('value', snapshot => {
+		db.ref('species/' + this.props.spotting.species).on('value', (snapshot) => {
 			this.setState ({
 				speciesName: snapshot.val().name
 			})
