@@ -131,7 +131,24 @@ class Spotting extends Component {
             console.log("[Spotting] Marking " + this.props.pkey + " as confirmed");
             snapshot.ref.child('confirmed').set(true);
             snapshot.ref.child('species').set(key);
+            snapshot.ref.child('concepts').set(this.state.concepts);
         });
+        clarifAiApp.models.get(clarifAiModelId).then (
+            (response) => {
+                console.log(response);
+                response.mergeConcepts(this.state.search).then (
+                    (response) => {
+                        console.log(response);
+                    },
+                    (err) => {
+                        console.log(err);
+                    }
+                )
+            },
+            (err) => {
+                console.log(err);
+            }
+        )
         clarifAiApp.inputs.create({
             url: this.props.spotting.image,
             concepts: [
@@ -180,7 +197,7 @@ class Spotting extends Component {
                     <select>
                         {
                             this.state.concepts.map ((concept) => {
-                                return(<option value={concept.name} key={concept.id}>{concept.name}</option>)
+                                return(<option value={concept.value} key={concept.id}>{concept.name + " - " + concept.value}</option>)
                             })
                         }
                     </select>
