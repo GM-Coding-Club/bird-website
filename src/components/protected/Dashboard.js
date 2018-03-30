@@ -9,7 +9,6 @@ import {clarifAiPrivate, clarifAiModelId} from '../../config/';
 var app = firebase.app();
 var db = firebase.database(app);
 
-console.log(clarifAiModelId);
 var clarifAiApp = new Clarifai.App({apiKey: clarifAiPrivate});
 
 class Dashboard extends Component {
@@ -20,9 +19,9 @@ class Dashboard extends Component {
         }
     }
     componentDidMount () {
-        db.ref('spottings').on('value', snapshot => {
+        db.ref('spottings').on('value', (snapshot) => {
             var results = [];
-            snapshot.forEach(spotting => {
+            snapshot.forEach((spotting) => {
                 if (spotting.child('confirmed').val() !== true) {
                     var result = spotting.val();
                     result[0] = spotting.key;
@@ -65,7 +64,7 @@ class Spotting extends Component {
     }
     
     componentDidMount () {
-        db.ref('species').on('value', snapshot => {
+        db.ref('species').on('value', (snapshot) => {
             this.setState({
                 species: snapshot.val()
             })
@@ -87,13 +86,14 @@ class Spotting extends Component {
     }
 
     handleSearch(event) {
-        console.log("Search query changed to:");
+        console.log("Search query changed to: " + event.target.value);
+        console.log(event.target.value);
         this.setState({search: event.target.value});
         this.setState({value: "New"})
     }
 
     handleSelect(event) {
-        console.log("Select area has changed to:");
+        console.log("Select area has changed to: ");
         console.log(event.target.value);
         this.setState({value: event.target.value});
     }
@@ -111,7 +111,7 @@ class Spotting extends Component {
             key = ref.key;
             console.log(key);
             
-            ref.once('value', snapshot => {
+            ref.once('value', (snapshot) => {
                 snapshot.ref.child('name').set(this.state.search);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
                 snapshot.ref.child('spottingCount').set(snapshot.child('spottingCount').val()+1);
@@ -119,7 +119,7 @@ class Spotting extends Component {
         } else {
             // Update species
             key = this.state.value;
-            db.ref('species/' + this.state.value).once('value', snapshot => {
+            db.ref('species/' + this.state.value).once('value', (snapshot) => {
                 console.log("[Species] Adding spotting to " + this.state.value);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
                 console.log("[Species] Adding one to spottingCount of" + this.state.value);
@@ -127,11 +127,28 @@ class Spotting extends Component {
             });
         }
         // Update spotting
-        db.ref('spottings/' + this.props.pkey).once('value', snapshot => {
+        db.ref('spottings/' + this.props.pkey).once('value', (snapshot) => {
             console.log("[Spotting] Marking " + this.props.pkey + " as confirmed");
             snapshot.ref.child('confirmed').set(true);
             snapshot.ref.child('species').set(key);
+            snapshot.ref.child('concepts').set(this.state.concepts);
         });
+        clarifAiApp.models.get(clarifAiModelId).then (
+            (response) => {
+                console.log(response);
+                response.mergeConcepts(this.state.search).then (
+                    (response) => {
+                        console.log(response);
+                    },
+                    (err) => {
+                        console.log(err);
+                    }
+                )
+            },
+            (err) => {
+                console.log(err);
+            }
+        )
         clarifAiApp.inputs.create({
             url: this.props.spotting.image,
             concepts: [
@@ -158,7 +175,7 @@ class Spotting extends Component {
                 <img src={this.props.spotting.image} alt="img of bird" width="60%"/>
                 <br/>
                 <button onClick={this.handleConfirm}>Confirm</button>
-                <a>key: {this.state.value}</a>
+                key: {this.state.value}
                 <br/>
                 <input value={this.state.search} onChange={this.handleSearch}></input>
                 <select onChange={this.handleSelect}>
@@ -176,14 +193,15 @@ class Spotting extends Component {
                     }
                 </select>
                 <br/>
-                <a>predictions: </a>
-                <select>
-                    {
-                        this.state.concepts.map ((concept) => {
-                            return(<option value={concept.name} key={concept.id}>{concept.name}</option>)
-                        })
-                    }
-                </select>
+                predictions: {
+                    <select>
+                        {
+                            this.state.concepts.map ((concept) => {
+                                return(<option value={concept.value} key={concept.id}>{concept.name + " - " + concept.value}</option>)
+                            })
+                        }
+                    </select>
+                }
             </div>
         )
     }
