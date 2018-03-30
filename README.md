@@ -1,16 +1,18 @@
 # src/components/config/index.js
 
 ```
-const keys = {
-  apiKey: "***",
-  authDomain: "***",
-  databaseURL: "***",
-  projectId: "**",
-  storageBucket: "***",
-  messagingSenderId: "***"
-}
+export const firebaseConfig = {
+  apiKey: "AIzaSyCEMfVSr0IXesy5_1um_G_n4Say1y2bcmE",
+  authDomain: "featheredfriends-1e2dd.firebaseapp.com",
+  databaseURL: "https://featheredfriends-1e2dd.firebaseio.com",
+  projectId: "featheredfriends-1e2dd",
+  storageBucket: "featheredfriends-1e2dd.appspot.com",
+  messagingSenderId: "621529239721"
+};
 
-export default keys
+export const clarifAiPublic = "";
+export const clarifAiPrivate = "";
+export const clarifAiModel = "";
 ```
 
 # ex database
