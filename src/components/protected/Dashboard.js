@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
 
-import firebase from 'firebase'
+import firebase from 'firebase';
+
+import Clarifai from 'clarifai';
+
+import {clarifAiPrivate, clarifAiModelId} from '../../config/';
 
 var app = firebase.app();
 var db = firebase.database(app);
+
+console.log(clarifAiModelId);
+var clarifAiApp = new Clarifai.App({apiKey: clarifAiPrivate});
 
 class Dashboard extends Component {
     constructor(props) {
@@ -48,7 +55,8 @@ class Spotting extends Component {
         this.state = {
             value: "",
             search: "Search Species/New",
-            species: {}
+            species: {},
+            concepts: []
         };
         
         this.handleSearch = this.handleSearch.bind(this);
@@ -62,6 +70,20 @@ class Spotting extends Component {
                 species: snapshot.val()
             })
         });
+        clarifAiApp.models.predict(clarifAiModelId, this.props.spotting.image).then(
+            (response) => {
+                var predictions = response.outputs[0].data.concepts;
+                this.setState({
+                    concepts: predictions
+                })
+            },
+            (err) => {
+                console.log(err);
+                this.setState({
+                    concepts: [{id: 0, name: "Error - see console"}]
+                })
+            }
+        );
     }
 
     handleSearch(event) {
@@ -110,6 +132,24 @@ class Spotting extends Component {
             snapshot.ref.child('confirmed').set(true);
             snapshot.ref.child('species').set(key);
         });
+        clarifAiApp.inputs.create({
+            url: this.props.spotting.image,
+            concepts: [
+                {
+                    id: this.state.search,
+                    value: true
+                }
+            ]
+        })
+        clarifAiApp.models.train(clarifAiModelId).then(
+            (response) => {
+                console.log("Trained:");
+                console.log(response);
+            },
+            (err) => {
+                console.log(err);
+            }
+        )
     }
 
     render() {
@@ -133,6 +173,15 @@ class Spotting extends Component {
                                 }
                             }
                         )
+                    }
+                </select>
+                <br/>
+                <a>predictions: </a>
+                <select>
+                    {
+                        this.state.concepts.map ((concept) => {
+                            return(<option value={concept.name} key={concept.id}>{concept.name}</option>)
+                        })
                     }
                 </select>
             </div>

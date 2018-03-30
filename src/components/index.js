@@ -66,9 +66,9 @@ export default class App extends Component {
                 <li>
                   <Link to="/" className="navbar-brand">Home</Link>
                 </li>
-		<li>
-		  <Link to="/explore" className="navbar-brand">Explore</Link>
-		</li>
+                <li>
+                  <Link to="/explore" className="navbar-brand">Explore</Link>
+                </li>
                 <li>
                   <Link to="/dashboard" className="navbar-brand">Dashboard</Link>
                 </li>
@@ -92,7 +92,7 @@ export default class App extends Component {
               <Switch>
                 <Route path='/' exact component={Home} />
                 <PublicRoute authed={this.state.authed} path='/login' component={Login} />
-		<PublicRoute authed={this.state.authed} path='/explore' component={Explore} />
+		            <Route path='/explore' exact component={Explore} />
                 <PrivateRoute authed={this.state.authed} path='/dashboard' component={Dashboard} />
                 <Route render={() => <h3>No Match</h3>} />
               </Switch>
