@@ -12,7 +12,7 @@ export const firebaseConfig = {
 
 export const clarifAiPublic = "";
 export const clarifAiPrivate = "";
-export const clarifAiModeld = "";
+export const clarifAiModel = "";
 ```
 
 # ex database
