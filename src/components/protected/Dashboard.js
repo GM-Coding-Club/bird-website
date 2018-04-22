@@ -101,6 +101,7 @@ class Spotting extends Component {
     handleConfirm(event) {
         console.log("Confirming...");
         var key;
+        var speciesName;
         if (this.state.value === "") {
             console.log("No value!");
             return;
@@ -110,9 +111,11 @@ class Spotting extends Component {
             var ref = db.ref('species/').push();
             key = ref.key;
             console.log(key);
+
+            speciesName = this.state.search;
             
             ref.once('value', (snapshot) => {
-                snapshot.ref.child('name').set(this.state.search);
+                snapshot.ref.child('name').set(speciesName);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
                 snapshot.ref.child('spottingCount').set(snapshot.child('spottingCount').val()+1);
             });
@@ -120,23 +123,29 @@ class Spotting extends Component {
             // Update species
             key = this.state.value;
             db.ref('species/' + this.state.value).once('value', (snapshot) => {
+                speciesName = snapshot.val().name;
                 console.log("[Species] Adding spotting to " + this.state.value);
                 snapshot.ref.child('spottings').push().set(this.props.pkey);
                 console.log("[Species] Adding one to spottingCount of" + this.state.value);
                 snapshot.ref.child('spottingCount').set(snapshot.child('spottingCount').val()+1);
             });
         }
+
         // Update spotting
+        console.log("Updating spottings...");
         db.ref('spottings/' + this.props.pkey).once('value', (snapshot) => {
             console.log("[Spotting] Marking " + this.props.pkey + " as confirmed");
             snapshot.ref.child('confirmed').set(true);
             snapshot.ref.child('species').set(key);
             snapshot.ref.child('concepts').set(this.state.concepts);
         });
+        
+        // Merge concepts
+        console.log("Merging concepts...");
         clarifAiApp.models.get(clarifAiModelId).then (
             (response) => {
                 console.log(response);
-                response.mergeConcepts(this.state.search).then (
+                response.mergeConcepts(speciesName).then (
                     (response) => {
                         console.log(response);
                     },
@@ -149,15 +158,21 @@ class Spotting extends Component {
                 console.log(err);
             }
         )
+
+        // Create image input
+        console.log("Creating image input");
         clarifAiApp.inputs.create({
             url: this.props.spotting.image,
             concepts: [
                 {
-                    id: this.state.search,
+                    id: speciesName,
                     value: true
                 }
             ]
         })
+
+        // Train model
+        console.log("Training model...");
         clarifAiApp.models.train(clarifAiModelId).then(
             (response) => {
                 console.log("Trained:");
